@@ -1,1 +1,0 @@
-# Aplicativo de Gerenciamento Financeiro
