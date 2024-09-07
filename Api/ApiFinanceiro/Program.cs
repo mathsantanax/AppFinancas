@@ -1,4 +1,16 @@
+using ApiFinanceiro.Domain.Interfaces;
+using ApiFinanceiro.Infraestrutura.Db;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddScoped<IValores, AdministradorServico>();
+
+builder.Services.AddDbContext<DbContexto>(options => {
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("SqlString")
+    );
+});
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
