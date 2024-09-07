@@ -9,7 +9,7 @@ builder.Services.AddScoped<IValores, ValoresServicos>();
 
 builder.Services.AddDbContext<DbContexto>(options => {
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("SqlString")
+        builder.Configuration.GetConnectionString("SqlServer")
     );
 });
 

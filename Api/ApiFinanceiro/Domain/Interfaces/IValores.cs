@@ -10,9 +10,9 @@ namespace ApiFinanceiro.Domain.Interfaces
 {
     public interface IValores
     {
-        List<ValoresDTO> BuscarPorData(DateTime date);
-        List<ValoresDTO> BurcarPorTipo(Tipo tipo);
-        List<string> BurcarPorCategoria(Categoria categoria);
+        List<Valores> BuscarPorData(DateTime date);
+        List<Valores> BuscarPorTipo(Tipo tipo);
+        List<Valores> BuscarPorCategoria(Categoria categoria);
         void Incluir(Valores valores);
         void Apagar(Valores valores);
     }

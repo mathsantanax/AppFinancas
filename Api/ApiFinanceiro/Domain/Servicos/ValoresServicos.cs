@@ -24,20 +24,21 @@ namespace ApiFinanceiro.Domain.Servicos
             dbContexto.SaveChanges();
         }
 
-        public List<string> BurcarPorCategoria(Categoria categoria)
-        {   
-            var lista = dbContexto.Valores.Where(x => x.Categoria == categoria).ToList();
-            return lista;
+        public List<Valores> BuscarPorCategoria(Categoria categoria)
+        {  
+            var categoriaStr = categoria.ToString();
+            return dbContexto.Valores.Where(x => x.Categoria == categoriaStr).ToList();
         }
 
-        public List<ValoresDTO> BurcarPorTipo(Tipo tipo)
+        public List<Valores> BuscarPorTipo(Tipo tipo)
         {
-            throw new NotImplementedException();
+            var tipoStr = tipo.ToString();
+            return dbContexto.Valores.Where(x => x.Tipo == tipoStr).ToList();
         }
 
-        public List<ValoresDTO> BuscarPorData(DateTime date)
+        public List<Valores> BuscarPorData(DateTime date)
         {
-            throw new NotImplementedException();
+            return dbContexto.Valores.Where(x => x.Date == date).ToList();
         }
 
         public void Incluir(Valores valores)

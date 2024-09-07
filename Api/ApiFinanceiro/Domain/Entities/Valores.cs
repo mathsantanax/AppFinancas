@@ -26,7 +26,7 @@ namespace ApiFinanceiro.Domain.Entities
         public string Tipo { get; set; } = default!;
         [Required]
         [StringLength(20)]
-        public Categoria Categoria { get; set; } = default!;
+        public string Categoria { get; set; } = default!;
 
     }
 }
