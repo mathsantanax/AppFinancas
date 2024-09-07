@@ -1,10 +1,11 @@
 using ApiFinanceiro.Domain.Interfaces;
+using ApiFinanceiro.Domain.Servicos;
 using ApiFinanceiro.Infraestrutura.Db;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddScoped<IValores, AdministradorServico>();
+builder.Services.AddScoped<IValores, ValoresServicos>();
 
 builder.Services.AddDbContext<DbContexto>(options => {
     options.UseSqlServer(
