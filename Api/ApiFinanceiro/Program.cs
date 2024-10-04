@@ -81,11 +81,22 @@ app.MapPost("/Financeiro",([FromBody] ValoresDTO valoresDTO, IValores valoresSer
         Categoria = valoresDTO.Categoria.ToString() ?? Categoria.Casa.ToString()
     };
 
-    valoresService.Incluir(valor);
+    if(valor.Tipo == Tipo.Saida.ToString())
+    {
+        valoresService.Incluir(valor);
+    }
+
 
     return Results.Created($"/Financeiro/{valor.Id}", valor);
 
 }).WithName("CriarValor")
+.WithOpenApi();
+
+app.MapGet("Financeiro", ([FromQuery] int? pagina, IValores valoresService) => {
+    var valores = valoresService.BuscarTodos(pagina);
+
+    return Results.Ok(valores);
+}).WithName("Financeiro")
 .WithOpenApi();
 
 app.MapGet("/Financeiro/Tipo/{tipo}", ([FromRoute] Tipo tipo, IValores valoresService) => {
@@ -114,6 +125,15 @@ app.MapGet("Financeiro/Data/{Date}", ([FromRoute] DateTime Date, IValores valore
     return Results.Ok(valores);
 }).WithName("BuscarPorData")
 .WithOpenApi();
+
+app.MapDelete("Financeiro/Delete/{id}", ([FromRoute] int id, IValores ValoresServicos) => {
+    var valores = ValoresServicos.BuscarPorId(id);
+    if(valores == null) return Results.NotFound("Não foi possível localizar a transação! ");
+
+    //Apagando a Transação
+    ValoresServicos.Apagar(valores);
+    return Results.Ok(valores);
+});
 
 #endregion
 

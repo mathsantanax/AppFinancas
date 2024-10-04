@@ -17,6 +17,8 @@ namespace ApiFinanceiro.Infraestrutura.Db
         }
 
         public DbSet<Valores> Valores { get; set; }	= default!;
+        public DbSet<Valores> ValoresEntrada { get; set; }	= default!;
+        public DbSet<Valores> ValoresSaida { get; set; }	= default!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
