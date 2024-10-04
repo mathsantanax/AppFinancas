@@ -33,13 +33,15 @@ namespace ApiFinanceiro.Infraestrutura.Db
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configuração da entidade Valores
+
             modelBuilder.Entity<Valores>(entity =>
             {
                 entity.Property(e => e.Valor)
-                    .HasColumnType("decimal(18, 2)"); // Define o tipo de coluna como decimal com precisão 18 e escala 2
+                    .HasColumnType("decimal(18, 2)");
+
+                entity.Property(e => e.Date)
+                .HasColumnType("date");
             });
         }
-
     }
 }

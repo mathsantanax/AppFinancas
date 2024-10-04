@@ -5,5 +5,6 @@ namespace ApiFinanceiro.Domain.Enuns
         Alimentação,
         Transporte,
         Casa,
+        Salario,
     }
 }

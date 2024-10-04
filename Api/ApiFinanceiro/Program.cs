@@ -1,6 +1,11 @@
+using ApiFinanceiro.Domain.DTOs;
+using ApiFinanceiro.Domain.Entities;
+using ApiFinanceiro.Domain.Enuns;
 using ApiFinanceiro.Domain.Interfaces;
+using ApiFinanceiro.Domain.ModelView;
 using ApiFinanceiro.Domain.Servicos;
 using ApiFinanceiro.Infraestrutura.Db;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,7 +14,7 @@ builder.Services.AddScoped<IValores, ValoresServicos>();
 
 builder.Services.AddDbContext<DbContexto>(options => {
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("SqlServer")
+        builder.Configuration.GetConnectionString("SqlString")
     );
 });
 
@@ -27,31 +32,89 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+#region Validação de DTO's
 
-app.MapGet("/weatherforecast", () =>
+    ErrosDeValidacao validacaoDTO (ValoresDTO valoresDTO)
+    {
+        var valida = new ErrosDeValidacao{
+            Mensagens = new List<string>()
+        };
+
+        if(string.IsNullOrEmpty(valoresDTO.Date.ToString()))
+            valida.Mensagens.Add("A data não pode ser vazia !");
+        
+        if(string.IsNullOrEmpty(valoresDTO.Valor.ToString()))
+            valida.Mensagens.Add("O valor não poder ser vazio! ");
+
+        if(string.IsNullOrEmpty(valoresDTO.Descricao))
+            valida.Mensagens.Add("Descrição não pode ser vazia!");
+
+        if(string.IsNullOrEmpty(valoresDTO.Tipo.ToString()))
+            valida.Mensagens.Add("O Tipo não poder ser vazio! ");
+
+        if(string.IsNullOrEmpty(valoresDTO.Categoria.ToString()))
+            valida.Mensagens.Add("O Categoria não poder ser vazio! ");
+
+        return valida;
+    }
+
+#endregion
+
+
+#region Finanças api
+app.MapPost("/Financeiro",([FromBody] ValoresDTO valoresDTO, IValores valoresService) =>
 {
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
+    var validacao = validacaoDTO(valoresDTO);
+
+    if(validacao.Mensagens.Count > 0)
+        return Results.BadRequest(validacao);
+
+    var valor = new Valores
+    {
+        Date = valoresDTO.Date.Date,
+        Descricao = valoresDTO.Descricao,
+        Valor = valoresDTO.Valor,
+        Tipo = valoresDTO.Tipo.ToString() ?? Tipo.Saida.ToString(),
+        Categoria = valoresDTO.Categoria.ToString() ?? Categoria.Casa.ToString()
+    };
+
+    valoresService.Incluir(valor);
+
+    return Results.Created($"/Financeiro/{valor.Id}", valor);
+
+}).WithName("CriarValor")
 .WithOpenApi();
 
-app.Run();
+app.MapGet("/Financeiro/Tipo/{tipo}", ([FromRoute] Tipo tipo, IValores valoresService) => {
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+    var valores = valoresService.BuscarPorTipo(tipo);
+    if(valores == null)
+        return Results.NotFound();
+
+    return Results.Ok(valores);
+}).WithName("BuscarPorTipo")
+.WithOpenApi();
+
+app.MapGet("Financeiro/Categoria/{categoria}", ([FromRoute] Categoria categoria, IValores valoresService) => {
+    var valores = valoresService.BuscarPorCategoria(categoria);
+    if(valores == null) return Results.NotFound();
+
+    return Results.Ok(valores);
+}).WithName("BuscarPorCategoria")
+.WithOpenApi();
+
+app.MapGet("Financeiro/Data/{Date}", ([FromRoute] DateTime Date, IValores valoresService) => {
+    var valores = valoresService.BuscarPorData(Date);
+
+    if(valores == null || !valores.Any()) return Results.NotFound("Nenhum valor encontrado para a data especidifcada! ");
+
+    return Results.Ok(valores);
+}).WithName("BuscarPorData")
+.WithOpenApi();
+
+#endregion
+
+app.Run();
