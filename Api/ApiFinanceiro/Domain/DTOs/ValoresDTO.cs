@@ -13,6 +13,6 @@ namespace ApiFinanceiro.Domain.DTOs
         public string Descricao { get; set;} = default!;
         public Tipo? Tipo{ get; set; } = default!;
         public Categoria? Categoria{ get; set; } = default!;
-
+        public int IdUser{ get; set; } = default!;
     }
 }

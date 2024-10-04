@@ -486,4 +486,7 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+#gerenciamento de ideias
+Gerenciamento de Ideia/*
+
 # End of https://www.toptal.com/developers/gitignore/api/windows,linux,visualstudiocode,macos,csharp

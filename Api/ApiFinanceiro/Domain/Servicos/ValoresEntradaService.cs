@@ -9,7 +9,7 @@ using ApiFinanceiro.Infraestrutura.Db;
 
 namespace ApiFinanceiro.Domain.Servicos
 {
-    public class ValoresEntradaService : IValores
+    public class ValoresEntradaService : IValoresEntrada
     {
         private readonly DbContexto dbContexto;
 
@@ -17,41 +17,41 @@ namespace ApiFinanceiro.Domain.Servicos
         {
             this.dbContexto = db;
         }
-        public void Apagar(Valores valores)
+        public void Apagar(ValoresEntrada valores)
         {
             dbContexto.ValoresEntrada.Remove(valores);
             dbContexto.SaveChanges();
         }
 
-        public List<Valores> BuscarPorCategoria(Categoria categoria)
+        public List<ValoresEntrada> BuscarPorCategoria(Categoria categoria)
         {  
             var categoriaStr = categoria.ToString();
             return dbContexto.ValoresEntrada.Where(x => x.Categoria == categoriaStr).ToList();
         }
 
-        public List<Valores> BuscarPorTipo(Tipo tipo)
+        public List<ValoresEntrada> BuscarPorTipo(Tipo tipo)
         {
             var tipoStr = tipo.ToString();
             return dbContexto.ValoresEntrada.Where(x => x.Tipo == tipoStr).ToList();
         }
 
-        public List<Valores> BuscarPorData(DateTime date)
+        public List<ValoresEntrada> BuscarPorData(DateTime date)
         {
             return dbContexto.ValoresEntrada.Where(x => x.Date == date).ToList();
         }
 
-        public void Incluir(Valores valores)
+        public void Incluir(ValoresEntrada valores)
         {
             dbContexto.ValoresEntrada.Add(valores);
             dbContexto.SaveChanges();
         }
 
-        public Valores? BuscarPorId(int id)
+        public ValoresEntrada? BuscarPorId(int id)
         {
             return dbContexto.ValoresEntrada.Where(x => x.Id == id).FirstOrDefault();
         }
 
-        public List<Valores> BuscarTodos(int? pagina = 1)
+        public List<ValoresEntrada> BuscarTodos(int? pagina = 1)
         {
             var query = dbContexto.ValoresEntrada.AsQueryable();
 

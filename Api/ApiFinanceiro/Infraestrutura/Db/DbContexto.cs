@@ -15,10 +15,8 @@ namespace ApiFinanceiro.Infraestrutura.Db
         {
             _configuration = configuration;
         }
-
-        public DbSet<Valores> Valores { get; set; }	= default!;
-        public DbSet<Valores> ValoresEntrada { get; set; }	= default!;
-        public DbSet<Valores> ValoresSaida { get; set; }	= default!;
+        public DbSet<ValoresEntrada> ValoresEntrada { get; set; }	= default!;
+        public DbSet<ValoresSaida> ValoresSaida { get; set; }	= default!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -36,7 +34,17 @@ namespace ApiFinanceiro.Infraestrutura.Db
             base.OnModelCreating(modelBuilder);
 
 
-            modelBuilder.Entity<Valores>(entity =>
+            //Configurando o Valor no Banco de dados para decimal e Data para date (yyyy-mm-dd)
+            modelBuilder.Entity<ValoresEntrada>(entity =>
+            {
+                entity.Property(e => e.Valor)
+                    .HasColumnType("decimal(18, 2)");
+
+                entity.Property(e => e.Date)
+                .HasColumnType("date");
+            });
+
+            modelBuilder.Entity<ValoresSaida>(entity =>
             {
                 entity.Property(e => e.Valor)
                     .HasColumnType("decimal(18, 2)");

@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using ApiFinanceiro.Domain.Enuns;
 
 namespace ApiFinanceiro.Domain.Entities
 {
-    public class Valores
+    public class ValoresSaida
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -27,6 +25,8 @@ namespace ApiFinanceiro.Domain.Entities
         [Required]
         [StringLength(20)]
         public string Categoria { get; set; } = default!;
+        [Required]
+        public int IdUser {get; set;} = default!;
 
     }
 }
