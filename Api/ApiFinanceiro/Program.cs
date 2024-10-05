@@ -12,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<IValoresEntrada, ValoresEntradaService>();
 builder.Services.AddScoped<IValoresSaida, ValoresSaidaService>();
+builder.Services.AddScoped<IUsers, UsersService>();
 
 builder.Services.AddDbContext<DbContexto>(options => {
     options.UseSqlServer(
@@ -64,9 +65,72 @@ app.UseHttpsRedirection();
 
 #endregion
 
+#region Usuario
+
+app.MapPost("/Usuario/Incluir", ([FromBody] UserDTO userDto, [FromServices] IUsers usersService) => {
+    if(userDto == null) return Results.BadRequest("No content");
+    var user = new User{
+        Name = userDto.Name,
+        Email = userDto.Email,
+    };
+
+    usersService.Incluir(user);
+    return Results.Created($"/Usuario/{user.Id}", user);
+}).WithTags("Usuario")
+.WithName("IncluirUsuario")
+.WithOpenApi();
+
+app.MapGet("/Usuario/Listar", ([FromServices] IUsers usersService) => {
+    
+    var user = usersService.ListarUsuarios();
+    return Results.Ok(user);
+})
+.WithName("ListarUsuarios")
+.WithTags("Usuario")
+.WithOpenApi();
+
+app.MapGet("/Usuario/BuscarPorEmail{email}", ([FromRoute] string email, [FromServices] IUsers usersService) => {
+
+    var user = usersService.BuscarPorEmail(email);
+
+    if(user == null) return Results.NotFound();
+    return Results.Ok(user);
+})
+.WithName("BuscarPorEmail")
+.WithTags("Usuario")
+.WithOpenApi();
+
+app.MapGet("/Usuario/BuscarPorId/{id}", ([FromRoute] int id, [FromServices] IUsers usersSerivce) => 
+{
+    var user = usersSerivce.BuscarPorId(id);
+    if(user == null) return Results.NotFound();
+
+    return Results.Ok(user);
+
+})
+.WithName("BuscarPorId")
+.WithTags("Usuario")
+.WithOpenApi();
+
+app.MapDelete("/Usuario/Delete/{id}", ([FromRoute] int id, IUsers usersService) => 
+{
+    var user = usersService.BuscarPorId(id);
+    if(user == null) return Results.NotFound();
+
+    usersService.Deletar(user);
+
+    return Results.NoContent();
+})
+.WithName("BuscarDeletar")
+.WithTags("Usuario")
+.WithOpenApi();
+
+
+#endregion
+
 
 #region Finanças api
-app.MapPost("/Financeiro",([FromBody] ValoresDTO valoresDTO, IValoresEntrada valoresEntradaService, IValoresSaida valoresSaidaService) =>
+app.MapPost("/Financeiro", ([FromBody] ValoresDTO valoresDTO, IValoresEntrada valoresEntradaService, IValoresSaida valoresSaidaService) =>
 {
     var validacao = validacaoDTO(valoresDTO);
 

@@ -15,6 +15,8 @@ namespace ApiFinanceiro.Infraestrutura.Db
         {
             _configuration = configuration;
         }
+
+        public DbSet<User> Usuario { get; set; } = default!;
         public DbSet<ValoresEntrada> ValoresEntrada { get; set; }	= default!;
         public DbSet<ValoresSaida> ValoresSaida { get; set; }	= default!;
 
@@ -52,6 +54,16 @@ namespace ApiFinanceiro.Infraestrutura.Db
                 entity.Property(e => e.Date)
                 .HasColumnType("date");
             });
+
+            modelBuilder.Entity<ValoresEntrada>()
+            .HasOne(m => m.User)
+            .WithMany()
+            .HasForeignKey(m => m.IdUser );
+
+            modelBuilder.Entity<ValoresSaida>()
+            .HasOne(m => m.User)
+            .WithMany()
+            .HasForeignKey(m => m.IdUser );
         }
     }
 }

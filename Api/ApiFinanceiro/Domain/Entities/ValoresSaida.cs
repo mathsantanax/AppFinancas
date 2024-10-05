@@ -25,8 +25,11 @@ namespace ApiFinanceiro.Domain.Entities
         [Required]
         [StringLength(20)]
         public string Categoria { get; set; } = default!;
+        
         [Required]
-        public int IdUser {get; set;} = default!;
+        [ForeignKey("User ")]
+        public int IdUser  { get; set; } = default!;
+        public User User { get; set; } = default!;
 
     }
 }
