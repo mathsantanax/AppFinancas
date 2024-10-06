@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using ApiFinanceiro.Domain.Entities;
@@ -17,6 +18,13 @@ namespace ApiFinanceiro.Domain.Servicos
         {
             this.dbContexto = db;
         }
+
+        public void Atualizar(User user)
+        {
+            dbContexto.Usuario.Update(user);
+            dbContexto.SaveChanges();
+        }
+
         public User? BuscarPorEmail(string email)
         {
             return dbContexto.Usuario.Where(x => x.Email == email).FirstOrDefault();

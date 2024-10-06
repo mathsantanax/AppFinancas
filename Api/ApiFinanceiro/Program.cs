@@ -67,7 +67,7 @@ app.UseHttpsRedirection();
 
 #region Usuario
 
-app.MapPost("/Usuario/Incluir", ([FromBody] UserDTO userDto, [FromServices] IUsers usersService) => {
+app.MapPost("/Usuario/", ([FromBody] UserDTO userDto, [FromServices] IUsers usersService) => {
     if(userDto == null) return Results.BadRequest("No content");
     var user = new User{
         Name = userDto.Name,
@@ -80,7 +80,7 @@ app.MapPost("/Usuario/Incluir", ([FromBody] UserDTO userDto, [FromServices] IUse
 .WithName("IncluirUsuario")
 .WithOpenApi();
 
-app.MapGet("/Usuario/Listar", ([FromServices] IUsers usersService) => {
+app.MapGet("/Usuario/listar", ([FromServices] IUsers usersService) => {
     
     var user = usersService.ListarUsuarios();
     return Results.Ok(user);
@@ -89,7 +89,7 @@ app.MapGet("/Usuario/Listar", ([FromServices] IUsers usersService) => {
 .WithTags("Usuario")
 .WithOpenApi();
 
-app.MapGet("/Usuario/BuscarPorEmail{email}", ([FromRoute] string email, [FromServices] IUsers usersService) => {
+app.MapGet("/Usuario/busca/email/{email}", ([FromRoute] string email, [FromServices] IUsers usersService) => {
 
     var user = usersService.BuscarPorEmail(email);
 
@@ -100,7 +100,7 @@ app.MapGet("/Usuario/BuscarPorEmail{email}", ([FromRoute] string email, [FromSer
 .WithTags("Usuario")
 .WithOpenApi();
 
-app.MapGet("/Usuario/BuscarPorId/{id}", ([FromRoute] int id, [FromServices] IUsers usersSerivce) => 
+app.MapGet("/Usuario/busca/id/{id}", ([FromRoute] int id, [FromServices] IUsers usersSerivce) => 
 {
     var user = usersSerivce.BuscarPorId(id);
     if(user == null) return Results.NotFound();
@@ -112,7 +112,21 @@ app.MapGet("/Usuario/BuscarPorId/{id}", ([FromRoute] int id, [FromServices] IUse
 .WithTags("Usuario")
 .WithOpenApi();
 
-app.MapDelete("/Usuario/Delete/{id}", ([FromRoute] int id, IUsers usersService) => 
+app.MapPut("/Usuario/att/{id}", ([FromRoute] int id, UserDTO userDTO, [FromServices] IUsers usersService) => {
+    var user = usersService.BuscarPorId(id);
+    if(user == null)   return Results.NotFound();
+
+    user.Name = userDTO.Name;
+    user.Email = userDTO.Email;
+
+    usersService.Atualizar(user);
+    return Results.Ok(user);
+})
+.WithName("Atualizar")
+.WithTags("Usuario")
+.WithOpenApi();
+
+app.MapDelete("/Usuario/del/{id}", ([FromRoute] int id, IUsers usersService) => 
 {
     var user = usersService.BuscarPorId(id);
     if(user == null) return Results.NotFound();
@@ -121,7 +135,7 @@ app.MapDelete("/Usuario/Delete/{id}", ([FromRoute] int id, IUsers usersService) 
 
     return Results.NoContent();
 })
-.WithName("BuscarDeletar")
+.WithName("Deletar")
 .WithTags("Usuario")
 .WithOpenApi();
 
