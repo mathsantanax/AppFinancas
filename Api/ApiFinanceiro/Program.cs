@@ -186,6 +186,14 @@ app.MapPost("/Financeiro", ([FromBody] ValoresDTO valoresDTO, IValoresEntrada va
 }).WithName("CriarValor")
 .WithOpenApi();
 
+app.MapGet("Financeiro/get/", () => {
+    
+});
+
+#endregion
+
+app.Run();
+
 // app.MapGet("Financeiro", ([FromQuery] int? pagina, IValores valoresService) => {
 //     var valores = valoresService.BuscarTodos(pagina);
 
@@ -228,7 +236,3 @@ app.MapPost("/Financeiro", ([FromBody] ValoresDTO valoresDTO, IValoresEntrada va
 //     ValoresServicos.Apagar(valores);
 //     return Results.Ok(valores);
 // });
-
-#endregion
-
-app.Run();
