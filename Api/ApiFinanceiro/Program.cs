@@ -67,7 +67,7 @@ app.UseHttpsRedirection();
 
 #region Usuario
 
-app.MapPost("/Usuario/", ([FromBody] UserDTO userDto, [FromServices] IUsers usersService) => {
+app.MapPost("/Usuario/Incluir", ([FromBody] UserDTO userDto, [FromServices] IUsers usersService) => {
     if(userDto == null) return Results.BadRequest("No content");
     var user = new User{
         Name = userDto.Name,
@@ -80,7 +80,7 @@ app.MapPost("/Usuario/", ([FromBody] UserDTO userDto, [FromServices] IUsers user
 .WithName("IncluirUsuario")
 .WithOpenApi();
 
-app.MapGet("/Usuario/listar", ([FromServices] IUsers usersService) => {
+app.MapGet("/Usuario/Listar", ([FromServices] IUsers usersService) => {
     
     var user = usersService.ListarUsuarios();
     return Results.Ok(user);
@@ -89,7 +89,7 @@ app.MapGet("/Usuario/listar", ([FromServices] IUsers usersService) => {
 .WithTags("Usuario")
 .WithOpenApi();
 
-app.MapGet("/Usuario/busca/email/{email}", ([FromRoute] string email, [FromServices] IUsers usersService) => {
+app.MapGet("/Usuario/BuscarPorEmail{email}", ([FromRoute] string email, [FromServices] IUsers usersService) => {
 
     var user = usersService.BuscarPorEmail(email);
 
@@ -100,7 +100,7 @@ app.MapGet("/Usuario/busca/email/{email}", ([FromRoute] string email, [FromServi
 .WithTags("Usuario")
 .WithOpenApi();
 
-app.MapGet("/Usuario/busca/id/{id}", ([FromRoute] int id, [FromServices] IUsers usersSerivce) => 
+app.MapGet("/Usuario/BuscarPorId/{id}", ([FromRoute] int id, [FromServices] IUsers usersSerivce) => 
 {
     var user = usersSerivce.BuscarPorId(id);
     if(user == null) return Results.NotFound();
@@ -112,21 +112,7 @@ app.MapGet("/Usuario/busca/id/{id}", ([FromRoute] int id, [FromServices] IUsers 
 .WithTags("Usuario")
 .WithOpenApi();
 
-app.MapPut("/Usuario/att/{id}", ([FromRoute] int id, UserDTO userDTO, [FromServices] IUsers usersService) => {
-    var user = usersService.BuscarPorId(id);
-    if(user == null)   return Results.NotFound();
-
-    user.Name = userDTO.Name;
-    user.Email = userDTO.Email;
-
-    usersService.Atualizar(user);
-    return Results.Ok(user);
-})
-.WithName("Atualizar")
-.WithTags("Usuario")
-.WithOpenApi();
-
-app.MapDelete("/Usuario/del/{id}", ([FromRoute] int id, IUsers usersService) => 
+app.MapDelete("/Usuario/Delete/{id}", ([FromRoute] int id, IUsers usersService) => 
 {
     var user = usersService.BuscarPorId(id);
     if(user == null) return Results.NotFound();
@@ -135,7 +121,7 @@ app.MapDelete("/Usuario/del/{id}", ([FromRoute] int id, IUsers usersService) =>
 
     return Results.NoContent();
 })
-.WithName("Deletar")
+.WithName("BuscarDeletar")
 .WithTags("Usuario")
 .WithOpenApi();
 
@@ -184,15 +170,28 @@ app.MapPost("/Financeiro", ([FromBody] ValoresDTO valoresDTO, IValoresEntrada va
     return Results.Ok();
 
 }).WithName("CriarValor")
+.WithTags("Finance")
 .WithOpenApi();
 
-app.MapGet("Financeiro/get/", () => {
-    
-});
+app.MapGet("/GetId/{categoria}", ([FromBody] Categoria categoria, [FromServices] IValoresEntrada valorEntrada, [FromServices] IValoresSaida  valorSaida) => {
+    var valoresEntrada = valorEntrada.BuscarPorCategoria(categoria);
+    var valoresSaida = valorSaida.BuscarPorCategoria(categoria);
+
+    if (valoresEntrada == null) return Results.NotFound();
+    if (valoresSaida == null) return Results.NotFound();
+
+    return Results.Ok($"{valoresEntrada}  {valoresSaida}");
+})
+.WithName("BuscaId")
+.WithTags("Finance")
+.WithOpenApi();
 
 #endregion
 
 app.Run();
+
+
+
 
 // app.MapGet("Financeiro", ([FromQuery] int? pagina, IValores valoresService) => {
 //     var valores = valoresService.BuscarTodos(pagina);
