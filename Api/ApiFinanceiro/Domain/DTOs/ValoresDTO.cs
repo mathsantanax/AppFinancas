@@ -9,13 +9,14 @@ namespace ApiFinanceiro.Domain.DTOs
 {
     public class ValoresDTO
     {
+        public int Id { get; set; }
         public DateTime Date{ get; set; }
         public decimal Valor { get; set; }
         public string Descricao { get; set;} = default!;
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public Tipo? Tipo{ get; set; } = default!;
+        public string Tipo{ get; set; } = default!;
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public Categoria? Categoria{ get; set; } = default!;
+        public string Categoria{ get; set; } = default!;
         public int IdUser{ get; set; } = default!;
     }
 }

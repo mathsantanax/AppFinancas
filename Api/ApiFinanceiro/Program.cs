@@ -129,65 +129,6 @@ app.MapDelete("/Usuario/Delete/{id}", ([FromRoute] int id, IUsers usersService) 
 #endregion
 
 
-#region Finanças api
-app.MapPost("/Financeiro", ([FromBody] ValoresDTO valoresDTO, IValoresEntrada valoresEntradaService, IValoresSaida valoresSaidaService) =>
-{
-    var validacao = validacaoDTO(valoresDTO);
-
-    if(validacao.Mensagens.Count > 0)
-        return Results.BadRequest(validacao);
-
-    if(valoresDTO.Tipo == Tipo.Entrada)
-    {
-        var valor = new ValoresEntrada
-        {
-            Date = valoresDTO.Date.Date,
-            Descricao = valoresDTO.Descricao,
-            Valor = valoresDTO.Valor,
-            Tipo = valoresDTO.Tipo.ToString() ?? Tipo.Saida.ToString(),
-            Categoria = valoresDTO.Categoria.ToString() ?? Categoria.Casa.ToString(),
-            IdUser = valoresDTO.IdUser
-        };
-
-        valoresEntradaService.Incluir(valor);
-        return Results.Created($"/Financeiro/{valor.Id}", valor);
-    }
-    else if(valoresDTO.Tipo == Tipo.Saida)
-    {   
-        var valor = new ValoresSaida
-        {
-            Date = valoresDTO.Date.Date,
-            Descricao = valoresDTO.Descricao,
-            Valor = valoresDTO.Valor,
-            Tipo = valoresDTO.Tipo.ToString() ?? Tipo.Saida.ToString(),
-            Categoria = valoresDTO.Categoria.ToString() ?? Categoria.Casa.ToString(),
-            IdUser = valoresDTO.IdUser
-        };
-        valoresSaidaService.Incluir(valor);
-        return Results.Created($"/Financeiro/{valor.Id}", valor);
-    }
-
-    return Results.Ok();
-
-}).WithName("CriarValor")
-.WithTags("Finance")
-.WithOpenApi();
-
-app.MapGet("/GetId/{categoria}", ([FromBody] Categoria categoria, [FromServices] IValoresEntrada valorEntrada, [FromServices] IValoresSaida  valorSaida) => {
-    var valoresEntrada = valorEntrada.BuscarPorCategoria(categoria);
-    var valoresSaida = valorSaida.BuscarPorCategoria(categoria);
-
-    if (valoresEntrada == null) return Results.NotFound();
-    if (valoresSaida == null) return Results.NotFound();
-
-    return Results.Ok($"{valoresEntrada}  {valoresSaida}");
-})
-.WithName("BuscaId")
-.WithTags("Finance")
-.WithOpenApi();
-
-#endregion
-
 app.Run();
 
 

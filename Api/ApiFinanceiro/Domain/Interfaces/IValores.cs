@@ -2,22 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ApiFinanceiro.Domain.DTOs;
 using ApiFinanceiro.Domain.Entities;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace ApiFinanceiro.Domain.Interfaces
 {
     public interface IValores
     {
-        List<ValoresEntrada> BuscarEntradasPorData(DateTime date);
-        List<ValoresSaida> BuscarSaidasPorData(DateTime date);
-        List<ValoresEntrada> BuscarEntradasPorTipo(ValoresEntrada valoresEntrada);
-        List<ValoresSaida> BuscarSaidaPorTipo(ValoresSaida valoresSaida);
-        List<ValoresEntrada> BuscarEntradaPorCategoria(ValoresEntrada valoresEntrada);
-        List<ValoresSaida> BuscarSaidaPorCategoria(ValoresSaida valoresSaida);
-
-        void IncluirEntrada(ValoresEntrada entrada);
-        void IncluirSaida(ValoresSaida saida);
-        void ApagarEntrada(ValoresEntrada entrada);
-        void ApagarSaida(ValoresSaida saida);
+        bool Apagar (ValoresDTO valoresDTO);
+        bool Incluir (ValoresDTO valoresDTO);
+        List<ValoresDTO> BuscaPorData(ValoresDTO valoresDTO);
+        List<ValoresDTO> BuscaTipo(ValoresDTO valoresDTO);
+        List<ValoresDTO> BuscaCategoria(ValoresDTO valoresDTO);
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ApiFinanceiro.Domain.DTOs;
 using ApiFinanceiro.Domain.Entities;
 using ApiFinanceiro.Domain.Interfaces;
 using ApiFinanceiro.Infraestrutura.Db;
@@ -18,54 +19,193 @@ namespace ApiFinanceiro.Domain.Servicos
         {
             _dbContexto = contexto;
         }
-        public void ApagarEntrada(ValoresEntrada entrada)
+        public bool Incluir(ValoresDTO valoresDTO)
         {
-            throw new NotImplementedException();
+            if(valoresDTO.Tipo.Equals("Entrada"))
+            {
+                ValoresEntrada entrada = new ValoresEntrada{
+                    Date = valoresDTO.Date,
+                    Valor = valoresDTO.Valor,
+                    Descricao = valoresDTO.Descricao,
+                    Tipo = valoresDTO.Tipo,
+                    Categoria = valoresDTO.Categoria,
+                    IdUser = valoresDTO.IdUser,
+                };
+                if(entrada != null)
+                {
+                    _dbContexto.ValoresEntrada.Add(entrada);
+                    _dbContexto.SaveChanges();
+                    return true;
+                }
+                {
+                    return false;
+                }
+            }
+            else if(valoresDTO.Tipo.Equals("Saida"))
+            {
+                    ValoresSaida saida = new ValoresSaida{
+                    Date = valoresDTO.Date,
+                    Valor = valoresDTO.Valor,
+                    Descricao = valoresDTO.Descricao,
+                    Tipo = valoresDTO.Tipo,
+                    Categoria = valoresDTO.Categoria,
+                    IdUser = valoresDTO.IdUser,
+                };
+                if(saida != null)
+                {
+                    _dbContexto.ValoresSaida.Add(saida);
+                    _dbContexto.SaveChanges();
+                    return true;
+                }
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
         }
 
-        public void ApagarSaida(ValoresSaida saida)
+        public bool Apagar(ValoresDTO valoresDTO)
         {
-            throw new NotImplementedException();
+            if(valoresDTO.Tipo.Equals("Entrada"))
+            {
+                ValoresEntrada entrada = new ValoresEntrada{
+                    Id = valoresDTO.Id,
+                    Date = valoresDTO.Date,
+                    Valor = valoresDTO.Valor,
+                    Descricao = valoresDTO.Descricao,
+                    Tipo = valoresDTO.Tipo,
+                    Categoria = valoresDTO.Categoria,
+                    IdUser = valoresDTO.IdUser,
+                };
+                if(entrada != null)
+                {
+                    _dbContexto.ValoresEntrada.Remove(entrada);
+                    _dbContexto.SaveChanges();
+                    return true;
+                }
+                {
+                    return false;
+                }
+            }
+            else if(valoresDTO.Tipo.Equals("Saida"))
+            {
+                    ValoresSaida saida = new ValoresSaida{
+                    Id = valoresDTO.Id,
+                    Date = valoresDTO.Date,
+                    Valor = valoresDTO.Valor,
+                    Descricao = valoresDTO.Descricao,
+                    Tipo = valoresDTO.Tipo,
+                    Categoria = valoresDTO.Categoria,
+                    IdUser = valoresDTO.IdUser,
+                };
+                if(saida != null)
+                {
+                    _dbContexto.ValoresSaida.Remove(saida);
+                    _dbContexto.SaveChanges();
+                    return true;
+                }
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
         }
 
-        public List<ValoresEntrada> BuscarEntradaPorCategoria(ValoresEntrada valoresEntrada)
+        public List<ValoresDTO> BuscaCategoria(ValoresDTO valoresDTO)
         {
-            throw new NotImplementedException();
+            var buscaEntradaPorCategoria = _dbContexto.ValoresEntrada.Where(x => x.Categoria == valoresDTO.Categoria).ToList();
+            var buscaSaidaPorCategoria = _dbContexto.ValoresSaida.Where(x => x.Categoria == valoresDTO.Categoria).ToList();
+
+            List<ValoresDTO> valores = new List<ValoresDTO>();
+
+            foreach(var entrada in buscaEntradaPorCategoria)
+            {
+                valores.Add(new ValoresDTO{
+                    Date = entrada.Date,
+                    Valor = entrada.Valor,
+                    Descricao = entrada.Descricao,
+                    Tipo = entrada.Tipo,
+                    Categoria = entrada.Categoria,
+                });
+            }
+            foreach(var saida in buscaSaidaPorCategoria)
+            {
+                valores.Add(new ValoresDTO{
+                    Date = saida.Date,
+                    Valor = saida.Valor,
+                    Descricao = saida.Descricao,
+                    Tipo = saida.Tipo,
+                    Categoria = saida.Categoria,
+                });
+            }
+            return valores;
         }
 
-        public List<ValoresEntrada> BuscarEntradasPorData(DateTime date)
+        public List<ValoresDTO> BuscaPorData(ValoresDTO valoresDTO)
         {
-            throw new NotImplementedException();
+            var buscaEntradaPorData = _dbContexto.ValoresEntrada.Where(x => x.Date == valoresDTO.Date).ToList();
+            var buscaSaidaPorData = _dbContexto.ValoresSaida.Where(x => x.Date == valoresDTO.Date).ToList();
+
+            List<ValoresDTO> valores = new List<ValoresDTO>();
+
+            foreach(var entrada in buscaEntradaPorData)
+            {
+                valores.Add(new ValoresDTO{
+                    Date = entrada.Date,
+                    Valor = entrada.Valor,
+                    Descricao = entrada.Descricao,
+                    Tipo = entrada.Tipo,
+                    Categoria = entrada.Categoria,
+                });
+            }
+            foreach(var saida in buscaSaidaPorData)
+            {
+                valores.Add(new ValoresDTO{
+                    Date = saida.Date,
+                    Valor = saida.Valor,
+                    Descricao = saida.Descricao,
+                    Tipo = saida.Tipo,
+                    Categoria = saida.Categoria,
+                });
+            }
+            return valores;
         }
 
-        public List<ValoresEntrada> BuscarEntradasPorTipo(ValoresEntrada valoresEntrada)
+        public List<ValoresDTO> BuscaTipo(ValoresDTO valoresDTO)
         {
-            throw new NotImplementedException();
+            var buscaEntradaPorTipo = _dbContexto.ValoresEntrada.Where(x => x.Tipo == valoresDTO.Tipo).ToList();
+            var buscaSaidaPorTipo = _dbContexto.ValoresSaida.Where(x => x.Tipo == valoresDTO.Tipo).ToList();
+
+            List<ValoresDTO> valores = new List<ValoresDTO>();
+
+            foreach(var entrada in buscaEntradaPorTipo)
+            {
+                valores.Add(new ValoresDTO{
+                    Date = entrada.Date,
+                    Valor = entrada.Valor,
+                    Descricao = entrada.Descricao,
+                    Tipo = entrada.Tipo,
+                    Categoria = entrada.Categoria,
+                });
+            }
+            foreach(var saida in buscaSaidaPorTipo)
+            {
+                valores.Add(new ValoresDTO{
+                    Date = saida.Date,
+                    Valor = saida.Valor,
+                    Descricao = saida.Descricao,
+                    Tipo = saida.Tipo,
+                    Categoria = saida.Categoria,
+                });
+            }
+            return valores;
         }
 
-        public List<ValoresSaida> BuscarSaidaPorCategoria(ValoresSaida valoresSaida)
-        {
-            throw new NotImplementedException();
-        }
-
-        public List<ValoresSaida> BuscarSaidaPorTipo(ValoresSaida valoresSaida)
-        {
-            throw new NotImplementedException();
-        }
-
-        public List<ValoresSaida> BuscarSaidasPorData(DateTime date)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void IncluirEntrada(ValoresEntrada entrada)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void IncluirSaida(ValoresSaida saida)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
