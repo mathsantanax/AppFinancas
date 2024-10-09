@@ -12,6 +12,7 @@ namespace ApiFinanceiro.Domain.Interfaces
     {
         bool Apagar (ValoresDTO valoresDTO);
         bool Incluir (ValoresDTO valoresDTO);
+        ValoresDTO BuscarPorId(ValoresDTO valoresDTO);
         List<ValoresDTO> BuscaPorData(ValoresDTO valoresDTO);
         List<ValoresDTO> BuscaTipo(ValoresDTO valoresDTO);
         List<ValoresDTO> BuscaCategoria(ValoresDTO valoresDTO);

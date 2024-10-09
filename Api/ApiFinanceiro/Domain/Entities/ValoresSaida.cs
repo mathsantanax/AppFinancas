@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
 namespace ApiFinanceiro.Domain.Entities
@@ -27,7 +28,7 @@ namespace ApiFinanceiro.Domain.Entities
         public string Categoria { get; set; } = default!;
         
         [Required]
-        [ForeignKey("User ")]
+        [ForeignKey("User")]
         public int IdUser  { get; set; } = default!;
         public User User { get; set; } = default!;
 

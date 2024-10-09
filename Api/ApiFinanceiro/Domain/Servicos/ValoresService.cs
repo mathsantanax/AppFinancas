@@ -71,15 +71,7 @@ namespace ApiFinanceiro.Domain.Servicos
         {
             if(valoresDTO.Tipo.Equals("Entrada"))
             {
-                ValoresEntrada entrada = new ValoresEntrada{
-                    Id = valoresDTO.Id,
-                    Date = valoresDTO.Date,
-                    Valor = valoresDTO.Valor,
-                    Descricao = valoresDTO.Descricao,
-                    Tipo = valoresDTO.Tipo,
-                    Categoria = valoresDTO.Categoria,
-                    IdUser = valoresDTO.IdUser,
-                };
+                var entrada = _dbContexto.ValoresEntrada.FirstOrDefault(x => x.Id == valoresDTO.Id);
                 if(entrada != null)
                 {
                     _dbContexto.ValoresEntrada.Remove(entrada);
@@ -92,15 +84,7 @@ namespace ApiFinanceiro.Domain.Servicos
             }
             else if(valoresDTO.Tipo.Equals("Saida"))
             {
-                    ValoresSaida saida = new ValoresSaida{
-                    Id = valoresDTO.Id,
-                    Date = valoresDTO.Date,
-                    Valor = valoresDTO.Valor,
-                    Descricao = valoresDTO.Descricao,
-                    Tipo = valoresDTO.Tipo,
-                    Categoria = valoresDTO.Categoria,
-                    IdUser = valoresDTO.IdUser,
-                };
+                var saida = _dbContexto.ValoresSaida.FirstOrDefault(x => x.Id == valoresDTO.Id);
                 if(saida != null)
                 {
                     _dbContexto.ValoresSaida.Remove(saida);
@@ -132,6 +116,7 @@ namespace ApiFinanceiro.Domain.Servicos
                     Descricao = entrada.Descricao,
                     Tipo = entrada.Tipo,
                     Categoria = entrada.Categoria,
+                    IdUser = entrada.IdUser
                 });
             }
             foreach(var saida in buscaSaidaPorCategoria)
@@ -142,6 +127,7 @@ namespace ApiFinanceiro.Domain.Servicos
                     Descricao = saida.Descricao,
                     Tipo = saida.Tipo,
                     Categoria = saida.Categoria,
+                    IdUser = saida.IdUser
                 });
             }
             return valores;
@@ -162,6 +148,7 @@ namespace ApiFinanceiro.Domain.Servicos
                     Descricao = entrada.Descricao,
                     Tipo = entrada.Tipo,
                     Categoria = entrada.Categoria,
+                    IdUser = entrada.IdUser
                 });
             }
             foreach(var saida in buscaSaidaPorData)
@@ -172,6 +159,7 @@ namespace ApiFinanceiro.Domain.Servicos
                     Descricao = saida.Descricao,
                     Tipo = saida.Tipo,
                     Categoria = saida.Categoria,
+                    IdUser = saida.IdUser
                 });
             }
             return valores;
@@ -192,6 +180,7 @@ namespace ApiFinanceiro.Domain.Servicos
                     Descricao = entrada.Descricao,
                     Tipo = entrada.Tipo,
                     Categoria = entrada.Categoria,
+                    IdUser = entrada.IdUser
                 });
             }
             foreach(var saida in buscaSaidaPorTipo)
@@ -202,10 +191,50 @@ namespace ApiFinanceiro.Domain.Servicos
                     Descricao = saida.Descricao,
                     Tipo = saida.Tipo,
                     Categoria = saida.Categoria,
+                    IdUser = saida.IdUser
                 });
             }
             return valores;
         }
 
+        public ValoresDTO BuscarPorId(ValoresDTO valoresDTO)
+        {
+            if(valoresDTO.Tipo.Equals("Entrada"))
+            {
+                var entrada = _dbContexto.ValoresEntrada.Where(x => x.Id == valoresDTO.Id).FirstOrDefault();
+
+                if(entrada == null) return valoresDTO;
+                
+                ValoresDTO valoresEntrada = new ValoresDTO{
+                    Id = entrada.Id,
+                    Date = entrada.Date,
+                    Valor = entrada.Valor,
+                    Descricao = entrada.Descricao,
+                    Tipo = entrada.Tipo,
+                    Categoria = entrada.Categoria,
+                    IdUser = entrada.IdUser
+                };
+                return valoresEntrada;
+            }
+            else if(valoresDTO.Tipo.Equals("Saida"))
+            {
+                var Saida = _dbContexto.ValoresSaida.Where(x => x.Id == valoresDTO.Id).FirstOrDefault();
+                if(Saida == null) return valoresDTO;
+                ValoresDTO valoresSaida = new ValoresDTO{
+                    Id = Saida.Id,
+                    Date = Saida.Date,
+                    Valor = Saida.Valor,
+                    Descricao = Saida.Descricao,
+                    Tipo = Saida.Tipo,
+                    Categoria = Saida.Categoria,
+                    IdUser = Saida.IdUser
+                };
+                return valoresSaida;
+            }
+            else
+            {
+                return valoresDTO;
+            }
+        }
     }
 }

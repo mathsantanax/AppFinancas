@@ -1,3 +1,4 @@
+using System.Runtime.Serialization;
 using ApiFinanceiro.Domain.DTOs;
 using ApiFinanceiro.Domain.Entities;
 using ApiFinanceiro.Domain.Enuns;
@@ -5,14 +6,14 @@ using ApiFinanceiro.Domain.Interfaces;
 using ApiFinanceiro.Domain.ModelView;
 using ApiFinanceiro.Domain.Servicos;
 using ApiFinanceiro.Infraestrutura.Db;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddScoped<IValoresEntrada, ValoresEntradaService>();
-builder.Services.AddScoped<IValoresSaida, ValoresSaidaService>();
 builder.Services.AddScoped<IUsers, UsersService>();
+builder.Services.AddScoped<IValores, ValoresService>();
 
 builder.Services.AddDbContext<DbContexto>(options => {
     options.UseSqlServer(
@@ -63,17 +64,34 @@ app.UseHttpsRedirection();
         return valida;
     }
 
+    ErrosDeValidacao validacaoUserDTO (UserDTO userDTO)
+    {
+        var validacao = new ErrosDeValidacao{
+            Mensagens = new List<string>()
+        };
+
+        if(string.IsNullOrEmpty(userDTO.Name))
+            validacao.Mensagens.Add("O Campo Nome não pode estar vazio !");
+        
+        if(string.IsNullOrEmpty(userDTO.Email))
+            validacao.Mensagens.Add("O Campo E-Mail não pode estar vazio! ");
+
+        return validacao;
+    }
 #endregion
 
 #region Usuario
 
 app.MapPost("/Usuario/Incluir", ([FromBody] UserDTO userDto, [FromServices] IUsers usersService) => {
-    if(userDto == null) return Results.BadRequest("No content");
+
+    var validacao = validacaoUserDTO(userDto);
+
+    if(validacao.Mensagens.Count > 0) return Results.BadRequest(validacao);
+
     var user = new User{
         Name = userDto.Name,
         Email = userDto.Email,
     };
-
     usersService.Incluir(user);
     return Results.Created($"/Usuario/{user.Id}", user);
 }).WithTags("Usuario")
@@ -125,9 +143,93 @@ app.MapDelete("/Usuario/Delete/{id}", ([FromRoute] int id, IUsers usersService) 
 .WithTags("Usuario")
 .WithOpenApi();
 
+#endregion // fim região user
 
-#endregion
 
+#region Finance
+
+app.MapPost("Finance/Post", ([FromBody] ValoresDTO valoresDTO, [FromServices] IValores valoresService) => {
+
+    var validacao = validacaoDTO(valoresDTO);
+
+    if(validacao.Mensagens.Count > 0) return Results.BadRequest(validacao);
+    bool valor = valoresService.Incluir(valoresDTO);
+    if(valor)
+    {
+        return Results.Created($"Finance/Post/{valoresDTO.Id}", valoresDTO);
+    }
+    else
+    {
+        return Results.BadRequest("Erro ao salvar no banco de dados! ");
+    }
+})
+.WithTags("Financeiro")
+.WithOpenApi();
+
+app.MapGet("Finance/GetId/{Tipo}`{id}", ([FromRoute]string Tipo, int id, [FromServices] IValores valoresService) => {
+    ValoresDTO valoresDTO = new ValoresDTO{
+        Tipo = Tipo,
+        Id = id,
+    };
+    var valores = valoresService.BuscarPorId(valoresDTO);
+    if(valores == null) return Results.BadRequest("Não encontrado nada !");
+
+    return Results.Ok(valores);
+})
+.WithTags("Financeiro")
+.WithOpenApi();
+
+app.MapGet("Finance/GetCategoria/{categoria}", (string categoria, [FromServices] IValores valoresService) => {
+    ValoresDTO valoresDTO = new ValoresDTO{
+        Categoria = categoria
+    };
+    var resultado = valoresService.BuscaCategoria(valoresDTO);
+    return Results.Ok(resultado);
+})
+.WithTags("Financeiro")
+.WithOpenApi();
+
+app.MapGet("Finance/GetDate/{date}", (DateTime date, [FromServices] IValores valoresService) => {
+    ValoresDTO valoresDTO = new ValoresDTO{
+        Date = date,
+    };
+    var resultado = valoresService.BuscaPorData(valoresDTO);
+    
+    return Results.Ok(resultado);
+})
+.WithTags("Financeiro")
+.WithOpenApi();
+
+app.MapGet("Finance/GetTipo/{tipo}", (string tipo, [FromServices] IValores valoresService) => {
+    ValoresDTO valoresDTO = new ValoresDTO{
+        Tipo = tipo
+    };
+
+    var resultado = valoresService.BuscaTipo(valoresDTO);
+    return Results.Ok(resultado);
+})
+.WithTags("Financeiro")
+.WithOpenApi();
+
+app.MapDelete("Finance/del/{Tipo}`{id}", ([FromRoute]string Tipo, int id, [FromServices] IValores valoresService) => {
+
+    ValoresDTO valoresDTO = new ValoresDTO{
+        Tipo = Tipo,
+        Id = id,
+    };
+    var valores = valoresService.BuscarPorId(valoresDTO);
+    if(valores == null) return Results.BadRequest("Não encontrado nada !");
+
+    bool resultado = valoresService.Apagar(valores);
+    if(resultado) return Results.Ok("Apagado com Sucesso !");
+
+    return Results.BadRequest();
+
+})
+.WithTags("Financeiro")
+.WithOpenApi();
+
+#endregion // fim região finance
 
 app.Run();
 
