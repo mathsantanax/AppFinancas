@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using ApiFinanceiro.Domain.DTOs;
 using ApiFinanceiro.Domain.Entities;
 using ApiFinanceiro.Domain.Interfaces;
 using ApiFinanceiro.Infraestrutura.Db;
@@ -25,31 +26,16 @@ namespace ApiFinanceiro.Domain.Servicos
             dbContexto.SaveChanges();
         }
 
-        public User? BuscarPorEmail(string email)
-        {
-            return dbContexto.Usuario.Where(x => x.Email == email).FirstOrDefault();
-        }
-
-        public User? BuscarPorId(int id)
-        {
-            return dbContexto.Usuario.Where(x => x.Id == id).FirstOrDefault();
-        }
-
-        public void Deletar(User user)
-        {
-            dbContexto.Usuario.Remove(user);
-            dbContexto.SaveChanges();
-        }
-
         public void Incluir(User user)
         {
             dbContexto.Usuario.Add(user);
             dbContexto.SaveChanges();
         }
 
-        public List<User> ListarUsuarios()
+        public User? Logar(UserDTO userDTO)
         {
-            return dbContexto.Usuario.ToList();
+            var usuario = dbContexto.Usuario.Where(x => x.Email == userDTO.Email && x.Password == userDTO.Password).FirstOrDefault();
+            return usuario;
         }
     }
 }

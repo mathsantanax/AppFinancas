@@ -20,5 +20,9 @@ namespace ApiFinanceiro.Domain.Entities
         [Required]
         [StringLength(120)]
         public string Email { get; set; } = default!;
+
+        [Required]
+        [StringLength(20)]
+        public string Password {get; set; } = default!;
     }
 }

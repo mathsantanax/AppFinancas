@@ -72,83 +72,26 @@ app.UseCors("AllowAllOrigins");
         return valida;
     }
 
-    ErrosDeValidacao validacaoUserDTO (UserDTO userDTO)
-    {
-        var validacao = new ErrosDeValidacao{
-            Mensagens = new List<string>()
-        };
-
-        if(string.IsNullOrEmpty(userDTO.Name))
-            validacao.Mensagens.Add("O Campo Nome não pode estar vazio !");
-        
-        if(string.IsNullOrEmpty(userDTO.Email))
-            validacao.Mensagens.Add("O Campo E-Mail não pode estar vazio! ");
-
-        return validacao;
-    }
 #endregion
 
 #region Usuario
 
-app.MapPost("/Usuario/Incluir", ([FromBody] UserDTO userDto, [FromServices] IUsers usersService) => {
+app.MapPost("/Usuario", ([FromBody] UserDTO userDTO, [FromServices] IUsers usersService) => {
+    var logar = usersService.Logar(userDTO);
 
-    var validacao = validacaoUserDTO(userDto);
-
-    if(validacao.Mensagens.Count > 0) return Results.BadRequest(validacao);
-
-    var user = new User{
-        Name = userDto.Name,
-        Email = userDto.Email,
-    };
-    usersService.Incluir(user);
-    return Results.Created($"/Usuario/{user.Id}", user);
-}).WithTags("Usuario")
-.WithName("IncluirUsuario")
-.WithOpenApi();
-
-app.MapGet("/Usuario/Listar", ([FromServices] IUsers usersService) => {
-    
-    var user = usersService.ListarUsuarios();
-    return Results.Ok(user);
+    if(logar != null)
+    {
+        return Results.Ok(new UserModelView{
+            Email = userDTO.Email,
+            Password = userDTO.Password,
+            Token = "0"
+        });
+    }
+    else 
+        return Results.Unauthorized();
 })
-.WithName("ListarUsuarios")
 .WithTags("Usuario")
-.WithOpenApi();
-
-app.MapGet("/Usuario/BuscarPorEmail{email}", ([FromRoute] string email, [FromServices] IUsers usersService) => {
-
-    var user = usersService.BuscarPorEmail(email);
-
-    if(user == null) return Results.NotFound();
-    return Results.Ok(user);
-})
-.WithName("BuscarPorEmail")
-.WithTags("Usuario")
-.WithOpenApi();
-
-app.MapGet("/Usuario/BuscarPorId/{id}", ([FromRoute] int id, [FromServices] IUsers usersSerivce) => 
-{
-    var user = usersSerivce.BuscarPorId(id);
-    if(user == null) return Results.NotFound();
-
-    return Results.Ok(user);
-
-})
-.WithName("BuscarPorId")
-.WithTags("Usuario")
-.WithOpenApi();
-
-app.MapDelete("/Usuario/Delete/{id}", ([FromRoute] int id, IUsers usersService) => 
-{
-    var user = usersService.BuscarPorId(id);
-    if(user == null) return Results.NotFound();
-
-    usersService.Deletar(user);
-
-    return Results.NoContent();
-})
-.WithName("BuscarDeletar")
-.WithTags("Usuario")
+.WithDescription("Logar Usuario")
 .WithOpenApi();
 
 #endregion // fim região user

@@ -4,8 +4,8 @@ namespace ApiFinanceiro.Domain.ModelView
 {
     public record UserModelView
     {
-        public int Id { get; set; } = default!;
-        public string Name { get; set; } = default!;
         public string Email { get; set; } = default!;
+        public string Password { get; set;} = default!;
+        public string Token { get; set; } = default!;
     }
 }
