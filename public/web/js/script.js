@@ -1,22 +1,35 @@
-document.getElementById('entradaForm').addEventListener('submit', function(event) {
+
+document.getElementById('entradaForm').addEventListener('submit', function(event){
     event.preventDefault();
-    const valor = document.getElementById('valorEntrada').value;
-    const descricao = document.getElementById('descricaoEntrada').value;
-    const categoria = document.getElementById('categoriaEntrada').value;
+    
+    const data = document.getElementById('data').value;
+    // var split = data.value.split('-');
+    // dataCompleta = split[2] + '-' + split[1] + '-' + split[0];
+    const valor = document.getElementById('valor').value;
+    const descricao = document.getElementById('descricao').value;
+    const tipo = document.getElementById('tipo').value;
+    const categoria = document.getElementById('categoria').value;
+    const idUser = document.getElementById('idUser').value;
 
-    const entradaData = {
-        valor: parseFloat(valor),
+    
+    const registro = {
+        date: data,
+        valor: valor,
         descricao: descricao,
-        tipo: "Entrada",
-        categoria: categoria
+        tipo: tipo,
+        categoria: categoria,
+        idUser: idUser
     };
+    
+    console.log(registro);
 
-    fetch('http://localhost:5109/Financeiro/Entrada', {
+    fetch('http://localhost:5109/Finance/Post', {
         method: 'POST',
+        mode: 'cors',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(entradaData)
+        body: JSON.stringify(registro)
     })
     .then(response => response.json())
     .then(data => {
@@ -28,42 +41,45 @@ document.getElementById('entradaForm').addEventListener('submit', function(event
     });
 });
 
-document.getElementById('saidaForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-    const valor = document.getElementById('valorSaida').value;
-    const descricao = document.getElementById('descricaoSaida').value;
-    const categoria = document.getElementById('categoriaSaida').value;
 
-    const saidaData = {
-        valor: parseFloat(valor),
-        descricao: descricao,
-        tipo: "Saida",
-        categoria: categoria
-    };
+// document.getElementById('saidaForm').addEventListener('submit', function(event) {
+//     event.preventDefault();
+//     const valor = document.getElementById('valorSaida').value;
+//     const descricao = document.getElementById('descricaoSaida').value;
+//     const categoria = document.getElementById('categoriaSaida').value;
 
-    fetch('http://localhost:5109/Financeiro/Saida', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(saidaData)
-    })
-    .then(response => response.json())
-    .then(data => {
-        alert('Saída registrada com sucesso!');
-        listarTransacoes();
-    })
-    .catch(error => {
-        console.error('Erro:', error);
-    });
-});
+//     const saidaData = {
+//         valor: parseFloat(valor),
+//         descricao: descricao,
+//         tipo: "Saida",
+//         categoria: categoria
+//     };
+
+//     fetch('http://localhost:5109/Financeiro/Saida', {
+//         method: 'POST',
+//         headers: {
+//             'Content-Type': 'application/json'
+//         },
+//         body: JSON.stringify(saidaData)
+//     })
+//     .then(response => response.json())
+//     .then(data => {
+//         alert('Saída registrada com sucesso!');
+//         listarTransacoes();
+//     })
+//     .catch(error => {
+//         console.error('Erro:', error);
+//     });
+// });
+
+const data = new Date;
+var day = data.getDate();
+var month = data.getMonth() + 1;
+var year = data.getFullYear();
 
 function listarTransacoes() {
-    fetch('http://localhost:5109/Finance/GetDate/2024-10-09', {
+    fetch(`http://localhost:5109/Finance/GetDate/${year}-${month}-${day}`, {
         method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
-        },
         mode: 'cors' // Modo CORS
     })
     .then(response => {
@@ -73,7 +89,19 @@ function listarTransacoes() {
         return response.json();
     })
     .then(data => {
-        console.log('Transações:', data);
+        const listarTransacoes = document.getElementById('listaTransacoes');
+        listarTransacoes.innerHTML = '';
+        data.forEach(element => {
+            const ConteudoItem = document.createElement('div');
+            ConteudoItem.innerHTML = `
+            <p><strong>Tipo:</strong> ${element.tipo}</p>
+            <p><strong>Data</strong> ${element.date}</p>
+            <p><strong>Valor:</strong> R$ ${element.valor}</p>
+            <p><strong>Descrição:</strong> ${element.descricao}</p>
+            <p><strong>Categoria:</strong> ${element.categoria}</p>
+            `;
+            listarTransacoes.appendChild(ConteudoItem);
+        });
         // Aqui você pode manipular os dados recebidos e exibi-los no seu HTML
     })
     .catch(error => {
