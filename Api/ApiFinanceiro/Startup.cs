@@ -23,22 +23,38 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
-
+        services.AddSwaggerGen();
+        
         services.AddScoped<IUsers, UsersService>();
         services.AddScoped<IValores, ValoresService>();
+
+        services.AddEndpointsApiExplorer();
 
         services.AddDbContext<DbContexto>(options =>{
             options.UseSqlServer(Configuration.GetConnectionString("SqlString"));
         });
 
+        services.AddCors(options =>
+        {
+            options.AddPolicy("AllowAll", builder =>
+            {
+                builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            });
+        });
     }
-    public void Configure(IApplicationBuilder app){
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env){
         app.UseSwagger();
         app.UseSwaggerUI();
+        
+        app.UseRouting();
+
+        app.UseCors("AllowAll");
 
         app.UseEndpoints(endpoints => {
             #region Home 
-            endpoints.MapGet("/", () => Results.Json(new Home())).AllowAnonymous().WithTags("HOme");
+            endpoints.MapGet("/", () => Results.Json(new Home())).AllowAnonymous().WithTags("Home");
             #endregion
 
             endpoints.MapPost("/Usuario", ([FromBody] UserDTO userDTO, [FromServices] IUsers usersService) => {
