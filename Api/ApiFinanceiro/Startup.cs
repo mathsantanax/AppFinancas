@@ -1,5 +1,8 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Net.NetworkInformation;
 using System.Runtime.Serialization;
+using System.Security.Claims;
+using System.Text;
 using ApiFinanceiro.Domain.DTOs;
 using ApiFinanceiro.Domain.Entities;
 using ApiFinanceiro.Domain.Enuns;
@@ -7,10 +10,13 @@ using ApiFinanceiro.Domain.Interfaces;
 using ApiFinanceiro.Domain.ModelView;
 using ApiFinanceiro.Domain.Servicos;
 using ApiFinanceiro.Infraestrutura.Db;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 public class Startup
 {
@@ -48,15 +54,65 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddSwaggerGen();
-        
+
+        var key = Encoding.ASCII.GetBytes(Configuration["Jwt:key"]);
+        services.AddAuthentication(options => {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options => {
+            options.RequireHttpsMetadata = false;
+            options.SaveToken = true;
+
+            options.TokenValidationParameters = new TokenValidationParameters{
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                //ValidIssuer = Configuration["Jwt:Issuer"],
+                //ValidAudience = Configuration["Jwt:Audience"],
+            };
+        });
+
+        services.AddAuthorization();
+
         services.AddScoped<IUsers, UsersService>();
         services.AddScoped<IValores, ValoresService>();
 
         services.AddEndpointsApiExplorer();
 
+        services.AddSwaggerGen(c =>
+        {
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "API de Fiananças", Version = "v1" });
+            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                Scheme = "Bearer",
+                BearerFormat = "JWT",
+                In = ParameterLocation.Header,
+                Description = "Insira o token JWT no formato: Bearer {token}"
+            });
+            c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    new string[] {}
+                }
+            });
+        });
+
+
         services.AddDbContext<DbContexto>(options =>{
-            options.UseSqlServer(Configuration.GetConnectionString("SqlString"));
+            options.UseSqlServer(
+                Configuration.GetConnectionString("SqlString"));
         });
 
         services.AddCors(options =>
@@ -70,10 +126,19 @@ public class Startup
         });
     }
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env){
+
+        if (env.IsDevelopment())
+        {
+            app.UseDeveloperExceptionPage();
+        }
+
+        app.UseRouting();
+
+        app.UseAuthentication();
+        app.UseAuthorization();
+        
         app.UseSwagger();
         app.UseSwaggerUI();
-        
-        app.UseRouting();
 
         app.UseCors("AllowAll");
 
@@ -88,18 +153,28 @@ public class Startup
 
             // Login de Usuario
             endpoints.MapPost("/Usuario", ([FromBody] UserDTO userDTO, [FromServices] IUsers usersService) => {
-                var logar = usersService.Logar(userDTO);
+                var user = usersService.Logar(userDTO);
 
-                if(logar != null)
+                if(user != null)
                 {
-                    return Results.Ok(new UserModelView{
-                        Email = userDTO.Email,
-                        Password = userDTO.Password,
-                        Token = "0"
-                    });
+                    var tokenHandler = new JwtSecurityTokenHandler();
+                    var key = Encoding.ASCII.GetBytes(Configuration["Jwt:key"]);
+
+                    var tokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Subject = new ClaimsIdentity(new Claim[]
+                        {
+                            new Claim(ClaimTypes.Name, userDTO.Email)
+                        }),
+                        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                    };
+
+                    var token = tokenHandler.CreateToken(tokenDescriptor);
+                    var tokenString = tokenHandler.WriteToken(token);
+
+                    return Results.Ok(new {token = tokenString});
                 }
-                else 
-                    return Results.Unauthorized();
+                return Results.Unauthorized();
                 })
                 .WithTags("Usuario")
                 .WithDescription("Logar Usuario")
@@ -124,6 +199,7 @@ public class Startup
                     return Results.BadRequest("Erro ao salvar no banco de dados! ");
                 }
             })
+            .RequireAuthorization()
             .WithTags("Financeiro")
             .WithOpenApi(); 
 
@@ -138,6 +214,7 @@ public class Startup
 
                 return Results.Ok(valores);
             })
+            .RequireAuthorization()
             .WithTags("Financeiro")
             .WithOpenApi();
 
@@ -149,6 +226,7 @@ public class Startup
                 var resultado = valoresService.BuscaCategoria(valoresDTO);
                 return Results.Ok(resultado);
             })
+            .RequireAuthorization()
             .WithTags("Financeiro")
             .WithOpenApi();
 
@@ -161,6 +239,7 @@ public class Startup
                 
                 return Results.Ok(resultado);
             })
+            .RequireAuthorization()
             .WithTags("Financeiro")
             .WithOpenApi();
 
@@ -173,6 +252,7 @@ public class Startup
                 var resultado = valoresService.BuscaTipo(valoresDTO);
                 return Results.Ok(resultado);
             })
+            .RequireAuthorization()
             .WithTags("Financeiro")
             .WithOpenApi();
 
@@ -192,6 +272,7 @@ public class Startup
                 return Results.BadRequest();
 
             })
+            .RequireAuthorization()
             .WithTags("Financeiro")
             .WithOpenApi();
 
