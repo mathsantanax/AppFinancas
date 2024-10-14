@@ -164,7 +164,8 @@ public class Startup
                     {
                         Subject = new ClaimsIdentity(new Claim[]
                         {
-                            new Claim(ClaimTypes.Name, userDTO.Email)
+                            new Claim(ClaimTypes.Name, user.Email),
+                            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
                         }),
                         SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
                     };
@@ -184,8 +185,16 @@ public class Startup
 
             #region Financeiro
             // Post de valores 
-            endpoints.MapPost("Finance/Post", ([FromBody] ValoresDTO valoresDTO, [FromServices] IValores valoresService) => {
+            endpoints.MapPost("Finance/Post", ([FromBody] ValoresDTO valoresDTO, [FromServices] IValores valoresService, HttpContext httpContext) => {
 
+            var userId = int.Parse(httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            if(userId == null)
+            {
+                return Results.Unauthorized();
+            }
+
+            valoresDTO.IdUser = userId;
             var validacao = validacaoValoresDTO(valoresDTO);
 
                 if(validacao.Mensagens.Count > 0) return Results.BadRequest(validacao);
