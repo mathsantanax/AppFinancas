@@ -71,7 +71,7 @@ namespace ApiFinanceiro.Domain.Servicos
         {
             if(valoresDTO.Tipo.Equals("Entrada"))
             {
-                var entrada = _dbContexto.ValoresEntrada.FirstOrDefault(x => x.Id == valoresDTO.Id);
+                var entrada = _dbContexto.ValoresEntrada.FirstOrDefault(x => x.Id == valoresDTO.Id && x.IdUser == valoresDTO.IdUser);
                 if(entrada != null)
                 {
                     _dbContexto.ValoresEntrada.Remove(entrada);
@@ -84,7 +84,7 @@ namespace ApiFinanceiro.Domain.Servicos
             }
             else if(valoresDTO.Tipo.Equals("Saida"))
             {
-                var saida = _dbContexto.ValoresSaida.FirstOrDefault(x => x.Id == valoresDTO.Id);
+                var saida = _dbContexto.ValoresSaida.FirstOrDefault(x => x.Id == valoresDTO.Id && x.IdUser == valoresDTO.IdUser);
                 if(saida != null)
                 {
                     _dbContexto.ValoresSaida.Remove(saida);
@@ -103,8 +103,8 @@ namespace ApiFinanceiro.Domain.Servicos
 
         public List<ValoresDTO> BuscaCategoria(ValoresDTO valoresDTO)
         {
-            var buscaEntradaPorCategoria = _dbContexto.ValoresEntrada.Where(x => x.Categoria == valoresDTO.Categoria).ToList();
-            var buscaSaidaPorCategoria = _dbContexto.ValoresSaida.Where(x => x.Categoria == valoresDTO.Categoria).ToList();
+            var buscaEntradaPorCategoria = _dbContexto.ValoresEntrada.Where(x => x.Categoria == valoresDTO.Categoria && x.IdUser == valoresDTO.IdUser).ToList();
+            var buscaSaidaPorCategoria = _dbContexto.ValoresSaida.Where(x => x.Categoria == valoresDTO.Categoria && x.IdUser == valoresDTO.IdUser).ToList();
 
             List<ValoresDTO> valores = new List<ValoresDTO>();
 
@@ -135,8 +135,8 @@ namespace ApiFinanceiro.Domain.Servicos
 
         public List<ValoresDTO> BuscaPorData(ValoresDTO valoresDTO)
         {
-            var buscaEntradaPorData = _dbContexto.ValoresEntrada.Where(x => x.Date == valoresDTO.Date).ToList();
-            var buscaSaidaPorData = _dbContexto.ValoresSaida.Where(x => x.Date == valoresDTO.Date).ToList();
+            var buscaEntradaPorData = _dbContexto.ValoresEntrada.Where(x => x.Date == valoresDTO.Date && x.IdUser == valoresDTO.IdUser).ToList();
+            var buscaSaidaPorData = _dbContexto.ValoresSaida.Where(x => x.Date == valoresDTO.Date && x.IdUser == valoresDTO.IdUser).ToList();
 
             List<ValoresDTO> valores = new List<ValoresDTO>();
 
@@ -167,8 +167,8 @@ namespace ApiFinanceiro.Domain.Servicos
 
         public List<ValoresDTO> BuscaTipo(ValoresDTO valoresDTO)
         {
-            var buscaEntradaPorTipo = _dbContexto.ValoresEntrada.Where(x => x.Tipo == valoresDTO.Tipo).ToList();
-            var buscaSaidaPorTipo = _dbContexto.ValoresSaida.Where(x => x.Tipo == valoresDTO.Tipo).ToList();
+            var buscaEntradaPorTipo = _dbContexto.ValoresEntrada.Where(x => x.Tipo == valoresDTO.Tipo && x.IdUser == valoresDTO.IdUser).ToList();
+            var buscaSaidaPorTipo = _dbContexto.ValoresSaida.Where(x => x.Tipo == valoresDTO.Tipo && x.IdUser == valoresDTO.IdUser).ToList();
 
             List<ValoresDTO> valores = new List<ValoresDTO>();
 
@@ -201,7 +201,7 @@ namespace ApiFinanceiro.Domain.Servicos
         {
             if(valoresDTO.Tipo.Equals("Entrada"))
             {
-                var entrada = _dbContexto.ValoresEntrada.Where(x => x.Id == valoresDTO.Id).FirstOrDefault();
+                var entrada = _dbContexto.ValoresEntrada.Where(x => x.Id == valoresDTO.Id && x.IdUser == valoresDTO.IdUser).FirstOrDefault();
 
                 if(entrada == null) return valoresDTO;
                 
@@ -218,7 +218,7 @@ namespace ApiFinanceiro.Domain.Servicos
             }
             else if(valoresDTO.Tipo.Equals("Saida"))
             {
-                var Saida = _dbContexto.ValoresSaida.Where(x => x.Id == valoresDTO.Id).FirstOrDefault();
+                var Saida = _dbContexto.ValoresSaida.Where(x => x.Id == valoresDTO.Id && x.IdUser == valoresDTO.IdUser).FirstOrDefault();
                 if(Saida == null) return valoresDTO;
                 ValoresDTO valoresSaida = new ValoresDTO{
                     Id = Saida.Id,

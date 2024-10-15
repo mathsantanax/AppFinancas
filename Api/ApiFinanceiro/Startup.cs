@@ -189,7 +189,7 @@ public class Startup
 
             var userId = int.Parse(httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-            if(userId == null)
+            if(userId.Equals(null))
             {
                 return Results.Unauthorized();
             }
@@ -213,10 +213,17 @@ public class Startup
             .WithOpenApi(); 
 
             // buscando valores passando tipo e id 
-            endpoints.MapGet("Finance/GetId/{Tipo}`{id}", ([FromRoute]string Tipo, int id, [FromServices] IValores valoresService) => {
+            endpoints.MapGet("Finance/GetId/{Tipo}`{id}", ([FromRoute]string Tipo, int id, [FromServices] IValores valoresService, HttpContext httpContext) => {
+            var userId = int.Parse(httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            if(userId.Equals(null))
+            {
+                return Results.Unauthorized();
+            }
                 ValoresDTO valoresDTO = new ValoresDTO{
                     Tipo = Tipo,
                     Id = id,
+                    IdUser = userId
                 };
                 var valores = valoresService.BuscarPorId(valoresDTO);
                 if(valores == null) return Results.BadRequest("Não encontrado nada !");
@@ -228,9 +235,17 @@ public class Startup
             .WithOpenApi();
 
             // buscando por categoria
-            endpoints.MapGet("Finance/GetCategoria/{categoria}", (string categoria, [FromServices] IValores valoresService) => {
+            endpoints.MapGet("Finance/GetCategoria/{categoria}", (string categoria, [FromServices] IValores valoresService, HttpContext httpContext) => {
+                var userId = int.Parse(httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+                if(userId.Equals(null))
+                {
+                    return Results.Unauthorized();
+                }
+
                 ValoresDTO valoresDTO = new ValoresDTO{
-                    Categoria = categoria
+                    Categoria = categoria,
+                    IdUser = userId
                 };
                 var resultado = valoresService.BuscaCategoria(valoresDTO);
                 return Results.Ok(resultado);
@@ -240,9 +255,17 @@ public class Startup
             .WithOpenApi();
 
             // buscando por data
-            endpoints.MapGet("Finance/GetDate/{date}", (DateTime date, [FromServices] IValores valoresService) => {
+            endpoints.MapGet("Finance/GetDate/{date}", (DateTime date, [FromServices] IValores valoresService, HttpContext httpContext) => {
+                var userId = int.Parse(httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+                if(userId.Equals(null))
+                {
+                    return Results.Unauthorized();
+                }
+
                 ValoresDTO valoresDTO = new ValoresDTO{
                     Date = date,
+                    IdUser = userId
                 };
                 var resultado = valoresService.BuscaPorData(valoresDTO);
                 
@@ -253,9 +276,17 @@ public class Startup
             .WithOpenApi();
 
             //buscando por tipo de procedimento entrada ou saida de valores
-            endpoints.MapGet("Finance/GetTipo/{tipo}", (string tipo, [FromServices] IValores valoresService) => {
+            endpoints.MapGet("Finance/GetTipo/{tipo}", (string tipo, [FromServices] IValores valoresService, HttpContext httpContext) => {
+                var userId = int.Parse(httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                
+                if(userId.Equals(null))
+                {
+                    return Results.Unauthorized();
+                }
+
                 ValoresDTO valoresDTO = new ValoresDTO{
-                    Tipo = tipo
+                    Tipo = tipo,
+                    IdUser = userId
                 };
 
                 var resultado = valoresService.BuscaTipo(valoresDTO);
@@ -266,11 +297,17 @@ public class Startup
             .WithOpenApi();
 
             // Deletando Valores passando o tipo e id
-            endpoints.MapDelete("Finance/del/{Tipo}`{id}", ([FromRoute]string Tipo, int id, [FromServices] IValores valoresService) => {
+            endpoints.MapDelete("Finance/del/{Tipo}`{id}", ([FromRoute]string Tipo, int id, [FromServices] IValores valoresService, HttpContext httpContext) => {
+                var userId = int.Parse(httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                if(userId.Equals(null))
+                {
+                    return Results.Unauthorized();
+                }
 
                 ValoresDTO valoresDTO = new ValoresDTO{
                     Tipo = Tipo,
                     Id = id,
+                    IdUser = userId
                 };
                 var valores = valoresService.BuscarPorId(valoresDTO);
                 if(valores == null) return Results.BadRequest("Não encontrado nada !");
